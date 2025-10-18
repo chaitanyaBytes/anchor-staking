@@ -5,12 +5,16 @@ use crate::{error::ErrorCode, StakeConfig, ADMIN};
 
 #[derive(Accounts)]
 pub struct InitializeConfig<'info> {
+    /// The admin/authority who can initialize the staking configuration
+    /// Must match the predefined ADMIN public key for security
     #[account(
         mut,
         address = ADMIN @ ErrorCode::InvalidAdmin
     )]
     pub admin: Signer<'info>,
 
+    /// Global staking configuration account that stores system parameters
+    /// PDA that will hold reward rates, limits, and other staking settings
     #[account(
         init,
         payer = admin,
@@ -20,6 +24,8 @@ pub struct InitializeConfig<'info> {
     )]
     pub config: Account<'info, StakeConfig>,
 
+    /// Reward token mint that will be used to distribute staking rewards
+    /// PDA controlled by the config account with 6 decimal places
     #[account(
         init_if_needed,
         payer = admin,
@@ -30,8 +36,10 @@ pub struct InitializeConfig<'info> {
     )]
     pub reward_mint: Account<'info, Mint>,
 
-    // programs
+    /// System program for account creation and rent management
     pub system_program: Program<'info, System>,
+    
+    /// SPL Token program for creating the reward mint
     pub token_program: Program<'info, Token>
 }
 
